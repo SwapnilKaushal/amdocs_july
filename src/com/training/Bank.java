@@ -4,21 +4,21 @@ import java.beans.Statement;
 import java.util.ArrayList;
 import java.util.Random;
 import java.sql.*;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
+import com.sun.org.apache.xerces.internal.dom.AbortException;
+import com.training.jdbc.DataB;
 import com.training.jdbc.New_Account;
+import com.training.jdbc.OldAcc;
 import com.training.jdbc.randomn;
 
 public class Bank  {
 	
 	public static void main(String[] args) {
-		System.out.println("-----Welcome to Bank Application-----");
-		System.out.println("-----New User Press 1 -----");
-		System.out.println("-----Existing User Press 2 -----");
+		System.out.println("----- Welcome to Bank Application -----");
+		System.out.println("----- New User Press 1 -----");
+		System.out.println("----- Existing User Press 2 -----");
 		
 		Scanner s=new Scanner(System.in);
 		int num=s.nextInt();
@@ -78,6 +78,88 @@ public class Bank  {
 		}
 		}
 		else {
+			Connection con=DataB.getConnection();
+			Scanner a=new Scanner(System.in);
+			System.out.println(".... Enter your Account Number ....");
+			long tempacc=a.nextLong();
+			try {
+				String q = "select * from CUSTOMER_DETAILS where ACCNO=?";
+				PreparedStatement st = con.prepareStatement(q);
+				st.setLong(1, tempacc);
+				ResultSet rs = st.executeQuery();
+				if (rs.next()) {
+				System.out.print("ACCOUNT NUMBER:"+rs.getLong("ACCNO")+"\nNAME:"+ rs.getString("NAME")+"\nBALANCE: "+ rs.getLong("BALANCE")+"\n");
+				
+				System.out.print("If you want to Deposit Funds press 1 \nIf you want to Withdraw Funds press 2 \nPress 3 to exit\n");
+				
+				int num1=s.nextInt();
+				
+				
+				if(num1==1) {
+					try {
+					String q1 = "select ACCNO,BALANCE from CUSTOMER_DETAILS where ACCNO=?";
+					PreparedStatement st1 = con.prepareStatement(q1);
+					st1.setLong(1, tempacc);
+					ResultSet rs1=st1.executeQuery();
+			        if(rs1.next()) {
+					long bal=rs1.getLong("BALANCE");
+					 long amt;  
+				        System.out.println("Enter the amount you want to deposit: ");  
+				        amt = a.nextLong();  
+				        bal = bal + amt;
+				       // System.out.println("New Balance:"+bal);
+				      
+				        st1=con.prepareStatement("UPDATE CUSTOMER_DETAILS SET BALANCE=? WHERE ACCNO=? ");
+				        st1.setLong(1, bal);
+				        st1.setLong(2, tempacc);
+				        st1.executeUpdate();
+				        System.out.println("Updated Balance : "+bal);
+			        }
+					}catch(SQLException e) {
+						e.printStackTrace();
+					}
+				        
+				}
+				
+				
+				else if(num1==2) {
+					try {
+						String q1 = "select ACCNO,BALANCE from CUSTOMER_DETAILS where ACCNO=?";
+						PreparedStatement st1 = con.prepareStatement(q1);
+						st1.setLong(1, tempacc);
+						ResultSet rs1=st1.executeQuery();
+				    
+						if(rs1.next()) {
+						long bal=rs1.getLong("BALANCE");
+						 long amt;  
+					        System.out.println("Enter the amount you want to withdraw: ");  
+					        amt = a.nextLong();  
+					        bal = bal - amt;
+					    
+					        st1=con.prepareStatement("UPDATE CUSTOMER_DETAILS SET BALANCE=? WHERE ACCNO=? ");
+					        st1.setLong(1, bal);
+					        st1.setLong(2, tempacc);
+					        st1.executeUpdate();
+					        System.out.println("Updated Balance : "+bal);
+				        }
+						}catch(SQLException e) {
+							e.printStackTrace();
+						}
+				}
+				
+				
+				else {
+					System.out.println("THANK YOU USING OUR SERVICES");
+				}
+				}
+				else {
+				System.out.println("Invalid account number");
+				}
+			}
+				
+			catch(Exception e) {
+				e.printStackTrace();
+			}
 			
 			
 		}
